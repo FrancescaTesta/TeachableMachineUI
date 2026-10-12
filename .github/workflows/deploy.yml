@@ -24,10 +24,18 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run build
+      - name: Build
+        # Repo normale: il sito vive in https://<utente>.github.io/<repo>/
+        # Repo <utente>.github.io: il sito vive alla radice, https://<utente>.github.io/
+        run: |
+          case "$REPO" in
+            *.github.io) export BASE_PATH=/ ;;
+            *) export BASE_PATH="/$REPO/" ;;
+          esac
+          echo "BASE_PATH=$BASE_PATH"
+          npm run build
         env:
-          # Il sito vive in https://<utente>.github.io/<repo>/
-          BASE_PATH: /${{ github.event.repository.name }}/
+          REPO: ${{ github.event.repository.name }}
       - uses: actions/configure-pages@v5
         with:
           enablement: true # attiva GitHub Pages (sorgente Actions) se non lo e' gia'
